@@ -30,4 +30,3 @@ Shared utility
 
 .. automodule:: saltext.nacl.utils.nacl
    :members:
-
