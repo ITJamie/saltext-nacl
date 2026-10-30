@@ -1,18 +1,49 @@
+import io
+
 import pytest
 
-import saltext.nacl.renderers.nacl_mod as nacl_renderer
+import saltext.nacl.renderers.nacl as nacl
+from unittest.mock import MagicMock, patch
 
 
 @pytest.fixture
 def configure_loader_modules():
-    module_globals = {
-        "__salt__": {"this_does_not_exist.please_replace_it": lambda: True},
-    }
-    return {
-        nacl_renderer: module_globals,
-    }
+    return {nacl: {}}
 
 
-def test_replace_this_this_with_something_meaningful():
-    assert "this_does_not_exist.please_replace_it" in nacl_renderer.__salt__
-    assert nacl_renderer.__salt__["this_does_not_exist.please_replace_it"]() is True
+def test__decrypt_object():
+    """
+    test _decrypt_object
+    """
+    secret = "Use more salt."
+    crypted = "NACL[MRN3cc+fmdxyQbz6WMF+jq1hKdU5X5BBI7OjK+atvHo1ll+w1gZ7XyWtZVfq9gK9rQaMfkDxmidJKwE0Mw==]"
+
+    secret_map = {"secret": secret}
+    crypted_map = {"secret": crypted}
+
+    secret_list = [secret]
+    crypted_list = [crypted]
+
+    with patch.dict(nacl.__salt__, {"nacl.dec": MagicMock(return_value=secret)}):
+        assert nacl._decrypt_object(secret) == secret
+        assert nacl._decrypt_object(crypted) == secret
+        assert nacl._decrypt_object(crypted_map) == secret_map
+        assert nacl._decrypt_object(crypted_list) == secret_list
+        assert nacl._decrypt_object(None) is None
+
+
+def test_render():
+    """
+    test render
+    """
+    secret = "Use more salt."
+    crypted = "NACL[MRN3cc+fmdxyQbz6WMF+jq1hKdU5X5BBI7OjK+atvHo1ll+w1gZ7XyWtZVfq9gK9rQaMfkDxmidJKwE0Mw==]"
+    with patch.dict(nacl.__salt__, {"nacl.dec": MagicMock(return_value=secret)}):
+        assert nacl.render(crypted) == secret
+
+
+def test_render_readable_object():
+    decrypt = MagicMock(return_value="secret")
+    with patch.dict(nacl.__salt__, {"nacl.dec": decrypt}):
+        assert nacl.render(io.StringIO("NACL[ciphertext]")) == "secret"
+    decrypt.assert_called_once_with("ciphertext")

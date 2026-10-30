@@ -1,18 +1,16 @@
-import pytest
+"""
+    Unit tests for the saltext.nacl.runners.nacl module
+"""
 
-import saltext.nacl.runners.nacl_mod as nacl_runner
-
-
-@pytest.fixture
-def configure_loader_modules():
-    module_globals = {
-        "__salt__": {"this_does_not_exist.please_replace_it": lambda: True},
-    }
-    return {
-        nacl_runner: module_globals,
-    }
+import saltext.nacl.runners.nacl
+from unittest.mock import patch
 
 
-def test_replace_this_this_with_something_meaningful():
-    assert "this_does_not_exist.please_replace_it" in nacl_runner.__salt__
-    assert nacl_runner.__salt__["this_does_not_exist.please_replace_it"]() is True
+def test_fips_mode():
+    """
+    Nacl runner doesn't load when fips_mode is True
+    """
+    opts = {"fips_mode": True}
+    with patch("saltext.nacl.runners.nacl.__opts__", opts, create=True):
+        ret = saltext.nacl.runners.nacl.__virtual__()
+        assert ret == (False, "nacl runner not available in FIPS mode")
