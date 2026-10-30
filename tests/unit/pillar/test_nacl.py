@@ -1,9 +1,10 @@
 """
-    Unit tests for the saltext.nacl.pillar.nacl module
+Unit tests for the saltext.nacl.pillar.nacl module
 """
 
-import saltext.nacl.pillar.nacl
 from unittest.mock import patch
+
+import saltext.nacl.pillar.nacl
 
 
 def test_fips_mode():

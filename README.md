@@ -1,107 +1,47 @@
-# Salt Extension for NaCl
+# saltext.nacl
 
-Salt extension for NaCl encrypted secrets
+NaCl encrypted secrets for **Salt 3008**, maintained by [ITJamie](https://github.com/ITJamie).
 
-## Security
+[Documentation](https://itjamie.github.io/saltext-nacl/) · [Issues](https://github.com/ITJamie/saltext-nacl/issues)
 
-If you discover a security vulnerability, please refer
-to [Salt's security guide][security].
+This self-contained extension supplies the `nacl` execution module, runner,
+external pillar, renderer and shared utility. Existing `nacl.*` commands,
+`nacl.config` settings, key formats and encrypted values remain compatible.
+Python 3.10+ and PyNaCl 1.6.2+ are required. Salt 3006/3007 are not supported.
 
-## User Documentation
+**Pre-release:** no version tag or PyPI release has been published. Package
+publishing is disabled. Use a wheel from a successful CI build, or install
+from this repository into Salt's Python environment:
 
-For setup and usage instructions, please refer to the
-[User Documentation][docs].
-
-## Contributing
-
-The saltext-nacl project welcomes contributions from anyone!
-
-The [Salt Extensions guide][salt-extensions-guide] provides comprehensive instructions on all aspects
-of Salt extension development, including [writing tests][writing-tests], [running tests][running-tests],
-[writing documentation][writing-docs] and [rendering the docs][rendering-docs].
-
-### Quickstart
-
-To get started contributing, first clone this repository (or your fork):
-
-```bash
-# Clone the repo
-git clone --origin upstream git@github.com:ITJamie/saltext-nacl.git
-
-# Change to the repo dir
-cd saltext-nacl
+```sh
+salt-pip install 'git+https://github.com/ITJamie/saltext-nacl.git@main'
 ```
 
-#### Automatic
-If you have installed [direnv][direnv], copying the included `.envrc.example` to `.envrc` and
-allowing it to run ensures a proper development environment is present and the virtual environment is active.
+Install on the **master** for `salt-run`, pillar rendering and the external
+pillar; install on each **minion** that needs the execution module or renderer.
+Restart affected daemons after installing or upgrading. For a system/virtualenv
+Salt installation, use that interpreter's `python -m pip` instead of `salt-pip`.
+Salt is an optional dependency (`.[salt]`); the normal install does not replace it.
 
-Without `direnv`, you can still run the automation explicitly:
+Configure only the master, for example `/etc/salt/master.d/nacl.conf`:
 
-```bash
-make dev  # or python3 tools/initialize.py
-source .venv/bin/activate
+```yaml
+nacl.config:
+  sk_file: /etc/salt/pki/master/nacl_sk
+  pk_file: /etc/salt/pki/master/nacl_pk
 ```
 
-#### Manual
-Please follow the [first steps][first-steps], skipping the repository initialization and first commit.
-
-### Pull request
-
-Always make changes in a feature branch:
-
-```bash
-git switch -c my-feature-branch
+```sh
+salt-run nacl.keygen sk_file=/etc/salt/pki/master/nacl_sk pk_file=/etc/salt/pki/master/nacl_pk
+salt-run nacl.enc data='test'
+# salt-run nacl.dec data='<encrypted value>'
 ```
 
-Please ensure you include a [news fragment](https://salt-extensions.github.io/salt-extension-copier/topics/documenting/changelog.html#procedure)
-describing your changes. This is a requirement for all user-facing changes (bug fixes, new features),
-with the exception of documentation changes.
+Back up existing keys before migrating. Never regenerate keys as an upgrade
+step: existing ciphertext needs the original private key. NaCl is unavailable
+in FIPS mode. New private-key files use POSIX mode `0600` (Windows uses ACLs).
 
-To [submit a Pull Request][submitting-pr], you'll need a fork of this repository in
-your own GitHub account. If you followed the instructions above,
-set your fork as the `origin` remote now:
-
-```bash
-git remote add origin git@github.com:<your_fork>.git
-```
-
-Ensure you followed the [first steps][first-steps] and commit your changes, fixing any
-failing `pre-commit` hooks. Then push the feature branch to your fork and submit a PR.
-
-### Ways to contribute
-
-Contributions come in many forms, and they’re all valuable! Here are some ways you can help
-without writing code:
-
-* **Documentation**: Especially examples showing how to use this project
-  to solve specific problems.
-* **Triaging issues**: Help manage [issues][issues] and participate in [discussions][discussions].
-* **Reviewing [Pull Requests][PRs]**: We especially appreciate reviews using [Conventional Comments][comments].
-
-You can also contribute by:
-
-* Writing blog posts
-* Sharing your experiences using Salt + NaCl
-  on social media
-* Giving talks at conferences
-* Publishing videos
-* Engaging in IRC, Discord or email groups
-
-Any of these things are super valuable to our community, and we sincerely
-appreciate every contribution!
-
-[security]: https://github.com/saltstack/salt/blob/master/SECURITY.md
-[salt-extensions-guide]: https://salt-extensions.github.io/salt-extension-copier/
-[writing-tests]: https://salt-extensions.github.io/salt-extension-copier/topics/testing/writing.html
-[running-tests]: https://salt-extensions.github.io/salt-extension-copier/topics/testing/running.html
-[writing-docs]: https://salt-extensions.github.io/salt-extension-copier/topics/documenting/writing.html
-[rendering-docs]: https://salt-extensions.github.io/salt-extension-copier/topics/documenting/building.html
-[first-steps]: https://salt-extensions.github.io/salt-extension-copier/topics/creation.html#initialize-the-python-virtual-environment
-[submitting-pr]: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork
-[direnv]: https://direnv.net
-[issues]: https://github.com/ITJamie/saltext-nacl/issues
-[PRs]: https://github.com/ITJamie/saltext-nacl/pulls
-[discussions]: https://github.com/ITJamie/saltext-nacl/discussions
-[comments]: https://conventionalcomments.org/
-[docs]: https://ITJamie.github.io/saltext-nacl/
+For development, testing and release preparation see [CONTRIBUTING.md](CONTRIBUTING.md).
+For maintenance and publication see [the release checklist](docs/topics/releasing.md).
+Source attribution and the pinned Copier template are recorded in [PROVENANCE.md](PROVENANCE.md).
+Security reporting is described in [SECURITY.md](SECURITY.md).

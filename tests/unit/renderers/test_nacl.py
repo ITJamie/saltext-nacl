@@ -1,9 +1,9 @@
 import io
+from unittest.mock import MagicMock, patch
 
 import pytest
 
 import saltext.nacl.renderers.nacl as nacl
-from unittest.mock import MagicMock, patch
 
 
 @pytest.fixture
@@ -16,7 +16,9 @@ def test__decrypt_object():
     test _decrypt_object
     """
     secret = "Use more salt."
-    crypted = "NACL[MRN3cc+fmdxyQbz6WMF+jq1hKdU5X5BBI7OjK+atvHo1ll+w1gZ7XyWtZVfq9gK9rQaMfkDxmidJKwE0Mw==]"
+    crypted = (
+        "NACL[MRN3cc+fmdxyQbz6WMF+jq1hKdU5X5BBI7OjK+atvHo1ll+w1gZ7XyWtZVfq9gK9rQaMfkDxmidJKwE0Mw==]"
+    )
 
     secret_map = {"secret": secret}
     crypted_map = {"secret": crypted}
@@ -37,7 +39,9 @@ def test_render():
     test render
     """
     secret = "Use more salt."
-    crypted = "NACL[MRN3cc+fmdxyQbz6WMF+jq1hKdU5X5BBI7OjK+atvHo1ll+w1gZ7XyWtZVfq9gK9rQaMfkDxmidJKwE0Mw==]"
+    crypted = (
+        "NACL[MRN3cc+fmdxyQbz6WMF+jq1hKdU5X5BBI7OjK+atvHo1ll+w1gZ7XyWtZVfq9gK9rQaMfkDxmidJKwE0Mw==]"
+    )
     with patch.dict(nacl.__salt__, {"nacl.dec": MagicMock(return_value=secret)}):
         assert nacl.render(crypted) == secret
 

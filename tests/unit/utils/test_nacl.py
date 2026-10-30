@@ -1,5 +1,5 @@
 """
-    Unit tests for the saltext.nacl.utils.nacl module
+Unit tests for the saltext.nacl.utils.nacl module
 """
 
 import builtins
@@ -10,13 +10,12 @@ import runpy
 import subprocess
 import sys
 import tempfile
-
-from tests.helpers import temporary_file
+from unittest.mock import MagicMock, patch
 
 import pytest
-
 import salt.utils.files
-from unittest.mock import MagicMock, patch
+
+from tests.helpers import temporary_file
 
 pytest.importorskip("nacl.public")
 pytest.importorskip("nacl.secret")
@@ -125,7 +124,7 @@ def test_fips_mode():
     """
     opts = {"fips_mode": True}
     with patch("saltext.nacl.utils.nacl.__opts__", opts, create=True):
-        ret = saltext.nacl.utils.nacl.__virtual__()
+        ret = nacl.__virtual__()
         assert ret == (False, "nacl utils not available in FIPS mode")
 
 
@@ -320,9 +319,7 @@ def test_missing_key_file(key_kind, tmp_path):
         "opts": {"pki_dir": str(tmp_path)},
         f"{key_kind}_file": str(tmp_path / "missing"),
     }
-    message = (
-        "no key or sk_file found" if key_kind == "sk" else "no pubkey or pk_file found"
-    )
+    message = "no key or sk_file found" if key_kind == "sk" else "no pubkey or pk_file found"
     with pytest.raises(Exception, match=message):
         getattr(nacl, f"_get_{key_kind}")(**kwargs)
 
@@ -350,9 +347,7 @@ def test_file_helpers_round_trip(test_keygen, tmp_path, fileclient, write_output
         "sk": test_keygen["sk"],
         "box_type": "secretbox",
     }
-    fetch = MagicMock(
-        side_effect=lambda name: pathlib.Path(name).read_text(encoding="utf-8")
-    )
+    fetch = MagicMock(side_effect=lambda name: pathlib.Path(name).read_text(encoding="utf-8"))
     functions = {"cp.get_file_str": fetch} if fileclient else {}
     encrypted_file = tmp_path / "encrypted"
     decrypted_file = tmp_path / "decrypted"
@@ -387,13 +382,9 @@ def test_file_helpers_refuse_overwrite(operation, test_keygen, tmp_path):
         "box_type": "secretbox",
     }
     source = tmp_path / "source"
-    source.write_bytes(
-        b"secret" if operation == "enc_file" else nacl.enc("secret", **kwargs)
-    )
+    source.write_bytes(b"secret" if operation == "enc_file" else nacl.enc("secret", **kwargs))
     output = tmp_path / "existing"
     output.write_bytes(b"keep this data")
-    with patch.dict(nacl.__salt__, {}, clear=True), pytest.raises(
-        Exception, match="already exist"
-    ):
+    with patch.dict(nacl.__salt__, {}, clear=True), pytest.raises(Exception, match="already exist"):
         getattr(nacl, operation)(str(source), str(output), **kwargs)
     assert output.read_bytes() == b"keep this data"

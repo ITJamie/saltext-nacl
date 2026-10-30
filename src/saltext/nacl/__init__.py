@@ -1,4 +1,5 @@
 """NaCl encryption for Salt, distributed as an independently maintained extension."""
+
 from importlib.metadata import version
 from pathlib import Path
 

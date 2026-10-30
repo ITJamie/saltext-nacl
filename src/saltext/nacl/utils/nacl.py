@@ -18,9 +18,7 @@ try:
     import nacl.public  # pylint: disable=no-name-in-module
     import nacl.secret  # pylint: disable=no-name-in-module
 except ImportError:
-    REQ_ERROR = (
-        "PyNaCl import error, perhaps missing python PyNaCl package or should update."
-    )
+    REQ_ERROR = "PyNaCl import error, perhaps missing python PyNaCl package or should update."
 
 __virtualname__ = "nacl"
 
@@ -60,8 +58,10 @@ def _get_config(**kwargs):
 
     config_key = f"{__virtualname__}.config"
     try:
-        config.update(kwargs.get("salt_funcs", globals().get("__salt__", {}))["config.get"](config_key, {}))
-    except (NameError, KeyError) as e:
+        config.update(
+            kwargs.get("salt_funcs", globals().get("__salt__", {}))["config.get"](config_key, {})
+        )
+    except (NameError, KeyError):
         # likely using salt-run so fallback to __opts__
         config.update(kwargs["opts"].get(config_key, {}))
     # pylint: disable=C0201
@@ -235,7 +235,7 @@ def enc_file(name, out=None, **kwargs):
     """
     try:
         data = kwargs.get("salt_funcs", globals().get("__salt__", {}))["cp.get_file_str"](name)
-    except Exception as e:  # pylint: disable=broad-except
+    except Exception:  # pylint: disable=broad-except
         # likly using salt-run so fallback to local filesystem
         with salt.utils.files.fopen(name, "rb") as f:
             data = salt.utils.stringutils.to_unicode(f.read())
@@ -307,7 +307,7 @@ def dec_file(name, out=None, **kwargs):
     """
     try:
         data = kwargs.get("salt_funcs", globals().get("__salt__", {}))["cp.get_file_str"](name)
-    except Exception as e:  # pylint: disable=broad-except
+    except Exception:  # pylint: disable=broad-except
         # likly using salt-run so fallback to local filesystem
         with salt.utils.files.fopen(name, "rb") as f:
             data = salt.utils.stringutils.to_unicode(f.read())

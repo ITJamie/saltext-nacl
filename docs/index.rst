@@ -1,36 +1,16 @@
-``saltext-nacl``: Integrate Salt with NaCl
-==========================================
+saltext.nacl
+============
 
-Salt extension for NaCl encrypted secrets
-
-.. toctree::
-  :maxdepth: 2
-  :caption: Guides
-  :hidden:
-
-  topics/installation
+NaCl encrypted secrets for Salt 3008. Independently maintained by ITJamie.
+No package release has been published yet; use CI wheel artifacts or the Git source.
 
 .. toctree::
-  :maxdepth: 2
-  :caption: Provided Modules
-  :hidden:
+   :maxdepth: 2
 
-  ref/modules/index
-  ref/pillar/index
-  ref/renderers/index
-  ref/runners/index
-
-.. toctree::
-  :maxdepth: 2
-  :caption: Reference
-  :hidden:
-
-  changelog
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   topics/installation
+   topics/configuration
+   topics/migration
+   topics/troubleshooting
+   topics/releasing
+   changelog
+   ref/api

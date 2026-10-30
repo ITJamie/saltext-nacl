@@ -1,7 +1,9 @@
 """Small test helpers independent of Salt's repository test suite."""
+
 from contextlib import contextmanager
 from pathlib import Path
 from tempfile import TemporaryDirectory
+
 
 @contextmanager
 def temporary_file(name):

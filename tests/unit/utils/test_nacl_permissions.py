@@ -1,11 +1,12 @@
 """Private-key file permissions and keypair persistence."""
 
+import os
 import pathlib
+from unittest.mock import MagicMock, patch
 
 import pytest
 
 import saltext.nacl.utils.nacl as nacl
-from unittest.mock import MagicMock, patch
 
 pytest.importorskip("nacl.public")
 
@@ -14,19 +15,20 @@ pytest.importorskip("nacl.public")
 def test_keygen_explicit_files_and_permissions(tmp_path, windows):
     sk_file = str(tmp_path / "secret")
     pk_file = str(tmp_path / "public")
+    chmod = MagicMock(wraps=os.chmod) if os.name != "nt" else MagicMock()
     owner = MagicMock()
     permissions = MagicMock()
-    with patch("salt.utils.platform.is_windows", return_value=windows), patch(
-        "salt.utils.win_functions.get_current_user",
-        return_value="test-user",
-        create=True,
-    ), patch("salt.utils.win_dacl.set_owner", owner, create=True), patch(
-        "salt.utils.win_dacl.set_permissions", permissions, create=True
+    with (
+        patch("salt.utils.platform.is_windows", return_value=windows),
+        patch(
+            "salt.utils.win_functions.get_current_user",
+            return_value="test-user",
+            create=True,
+        ),
+        patch("salt.utils.win_dacl.set_owner", owner, create=True),
+        patch("salt.utils.win_dacl.set_permissions", permissions, create=True),
     ):
-        assert (
-            nacl.keygen(sk_file, pk_file)
-            == f"saved sk_file:{sk_file}  pk_file: {pk_file}"
-        )
+        assert nacl.keygen(sk_file, pk_file) == f"saved sk_file:{sk_file}  pk_file: {pk_file}"
     secret = pathlib.Path(sk_file).read_bytes()
     public = pathlib.Path(pk_file).read_bytes()
     # Deriving the public key from the saved secret must reproduce the keypair.
@@ -45,7 +47,9 @@ def test_keygen_explicit_files_and_permissions(tmp_path, windows):
             protected=True,
         )
     else:
-        assert pathlib.Path(sk_file).stat().st_mode & 0o7777 == 0o600
+        chmod.assert_called_once_with(sk_file, 0o600)
+        if os.name != "nt":
+            assert pathlib.Path(sk_file).stat().st_mode & 0o7777 == 0o600
         owner.assert_not_called()
         permissions.assert_not_called()
     with pytest.raises(Exception, match="already exist"):

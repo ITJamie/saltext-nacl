@@ -3,10 +3,10 @@
 import base64
 
 import pytest
-
 import salt.config
 import salt.loader
 import salt.utils.yaml
+
 from tests.conftest import FIPS_TESTRUN
 
 nacl_public = pytest.importorskip("nacl.public")
@@ -28,9 +28,7 @@ def test_ext_pillar_decrypts_nested_data(tmp_path):
     master_config = tmp_path / "master"
     master_config.write_text("", encoding="utf-8")
     opts = salt.config.master_config(str(master_config))
-    ciphertext = base64.b64encode(
-        nacl_public.SealedBox(key.public_key).encrypt(b"test")
-    ).decode()
+    ciphertext = base64.b64encode(nacl_public.SealedBox(key.public_key).encrypt(b"test")).decode()
     functions = salt.loader.minion_mods(opts)
     pillars = salt.loader.pillars(opts, functions)
     data = {"nested": [f"NACL[{ciphertext}]", "unchanged"], "number": 42}

@@ -28,13 +28,8 @@ def test_file_round_trip(api, tmp_path):
     source.write_bytes(b"a secret\nwith a second line")
     kwargs = {"sk": keys["sk"], "box_type": "secretbox"}
 
-    assert (
-        api.enc_file(str(source), out=str(encrypted), **kwargs) == f"Wrote: {encrypted}"
-    )
+    assert api.enc_file(str(source), out=str(encrypted), **kwargs) == f"Wrote: {encrypted}"
     assert encrypted.read_bytes() != source.read_bytes()
     assert api.dec_file(str(encrypted), **kwargs) == source.read_bytes()
-    assert (
-        api.dec_file(str(encrypted), out=str(decrypted), **kwargs)
-        == f"Wrote: {decrypted}"
-    )
+    assert api.dec_file(str(encrypted), out=str(decrypted), **kwargs) == f"Wrote: {decrypted}"
     assert decrypted.read_bytes() == source.read_bytes()

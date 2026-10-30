@@ -134,3 +134,4 @@ src/saltext/nacl/version.py
 
 # Ignore CI generated artifacts
 artifacts/
+.ruff_cache/

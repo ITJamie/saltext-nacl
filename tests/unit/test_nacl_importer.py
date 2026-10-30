@@ -2,11 +2,15 @@ import importlib.machinery
 import os
 import sys
 import types
+from unittest.mock import MagicMock
 
 import pytest
-
 from salt import NaclImporter
-from unittest.mock import MagicMock
+
+
+def _find(importer, name):
+    # Released 3008.5 uses the legacy finder; newer 3008 branches use find_spec.
+    return getattr(importer, "find_spec", getattr(importer, "find_module", None))(name)
 
 
 @pytest.mark.parametrize("fullname", ["nacl", "nacl.signing"])
@@ -14,11 +18,14 @@ def test_find_spec_accepts_nacl(fullname, monkeypatch):
     monkeypatch.setattr(NaclImporter, "loading", False)
     importer = NaclImporter()
 
-    spec = importer.find_spec(fullname)
+    spec = _find(importer, fullname)
 
     assert spec is not None
-    assert spec.name == fullname
-    assert spec.loader is importer
+    if hasattr(importer, "find_spec"):
+        assert spec.name == fullname
+        assert spec.loader is importer
+    else:
+        assert spec is importer
     assert NaclImporter.loading is True
 
 
@@ -26,7 +33,7 @@ def test_find_spec_declines_unrelated_module(monkeypatch):
     monkeypatch.setattr(NaclImporter, "loading", False)
     importer = NaclImporter()
 
-    assert importer.find_spec("json") is None
+    assert _find(importer, "json") is None
     assert NaclImporter.loading is False
 
 
@@ -34,13 +41,11 @@ def test_find_spec_declines_while_loading(monkeypatch):
     monkeypatch.setattr(NaclImporter, "loading", True)
     importer = NaclImporter()
 
-    assert importer.find_spec("nacl.signing") is None
+    assert _find(importer, "nacl.signing") is None
     assert NaclImporter.loading is True
 
 
-@pytest.mark.parametrize(
-    "dlopen,deepbind", [(False, False), (True, False), (True, True)]
-)
+@pytest.mark.parametrize("dlopen,deepbind", [(False, False), (True, False), (True, True)])
 def test_create_module_restores_dlopen_flags(monkeypatch, dlopen, deepbind):
     importer = NaclImporter()
     monkeypatch.setattr(NaclImporter, "loading", True)

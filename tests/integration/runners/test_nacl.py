@@ -4,23 +4,21 @@ Tests for the nacl runner
 
 import ast
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
-
 import salt.config
 import salt.utils.stringutils
 import salt.utils.yaml
+
 from tests.conftest import FIPS_TESTRUN
-from unittest.mock import patch
 
 pytest.importorskip("nacl.public")
 pytest.importorskip("nacl.secret")
 
 import saltext.nacl.runners.nacl as nacl
 
-pytestmark = [
-    
-]
+pytestmark = []
 
 
 @pytest.fixture(scope="module")
@@ -184,9 +182,7 @@ def test_cli_enc_dec_with_master_d_config(salt_factories, tmp_path, minion_opts)
     config = {"nacl.config": {"sk_file": str(sk_file), "pk_file": str(pk_file)}}
     config_dir = Path(master.config["conf_file"]).parent / "master.d"
     config_dir.mkdir(exist_ok=True)
-    (config_dir / "nacl.conf").write_text(
-        salt.utils.yaml.safe_dump(config), encoding="utf-8"
-    )
+    (config_dir / "nacl.conf").write_text(salt.utils.yaml.safe_dump(config), encoding="utf-8")
     # No master daemon is needed, but the runner writes a job record here.
     (Path(master.config["cachedir"]) / "proc").mkdir(parents=True, exist_ok=True)
     cli = master.salt_run_cli()

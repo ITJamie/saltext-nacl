@@ -1,9 +1,10 @@
 """
-    Unit tests for the saltext.nacl.runners.nacl module
+Unit tests for the saltext.nacl.runners.nacl module
 """
 
-import saltext.nacl.runners.nacl
 from unittest.mock import patch
+
+import saltext.nacl.runners.nacl
 
 
 def test_fips_mode():

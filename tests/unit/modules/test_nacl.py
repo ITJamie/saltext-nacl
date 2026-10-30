@@ -1,13 +1,12 @@
 """
-    Unit tests for the saltext.nacl.modules.nacl module
+Unit tests for the saltext.nacl.modules.nacl module
 """
 
 import os
+from unittest.mock import patch
 
 import pytest
-
 import salt.utils.stringutils
-from unittest.mock import patch
 
 pytest.importorskip("nacl.public")
 pytest.importorskip("nacl.secret")
@@ -49,7 +48,7 @@ def test_fips_mode():
     """
     opts = {"fips_mode": True}
     with patch("saltext.nacl.modules.nacl.__opts__", opts, create=True):
-        ret = saltext.nacl.modules.nacl.__virtual__()
+        ret = nacl.__virtual__()
         assert ret == (False, "nacl module not available in FIPS mode")
 
 
