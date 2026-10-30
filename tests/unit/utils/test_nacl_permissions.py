@@ -19,6 +19,7 @@ def test_keygen_explicit_files_and_permissions(tmp_path, windows):
     owner = MagicMock()
     permissions = MagicMock()
     with (
+        patch("saltext.nacl.utils.nacl.os.chmod", chmod),
         patch("salt.utils.platform.is_windows", return_value=windows),
         patch(
             "salt.utils.win_functions.get_current_user",

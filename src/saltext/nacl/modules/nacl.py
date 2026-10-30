@@ -51,10 +51,10 @@ Now with your keypair, you can encrypt data:
 
 You have two option, `sealedbox` or `secretbox`.
 
-SecretBox is data encrypted using private key `pk`. Sealedbox is encrypted using public key `pk`.
+SecretBox encrypts using the secret key `sk`. SealedBox encrypts using the public key `pk`.
 
 Recommend using Sealedbox because the one way encryption permits developers to encrypt data for source control but not decrypt.
-Sealedbox only has one key that is for both encryption and decryption.
+SecretBox uses the same secret key for encryption and decryption.
 
 .. code-block:: bash
 
@@ -211,7 +211,7 @@ def enc_file(name, out=None, **kwargs):
         salt-run nacl.enc_file name=/tmp/id_rsa
         salt-call nacl.enc_file name=salt://crt/mycert out=/tmp/cert
         salt-run nacl.enc_file name=/tmp/id_rsa box_type=secretbox \
-            sk_file=/etc/salt/pki/master/nacl.pub
+            sk_file=/etc/salt/pki/master/nacl
     """
     kwargs["opts"] = __opts__
     kwargs["salt_funcs"] = globals().get("__salt__", {})
@@ -244,7 +244,7 @@ def dec_file(name, out=None, **kwargs):
         salt-run nacl.dec_file name=/tmp/id_rsa.nacl
         salt-call nacl.dec_file name=salt://crt/mycert.nacl out=/tmp/id_rsa
         salt-run nacl.dec_file name=/tmp/id_rsa.nacl box_type=secretbox \
-            sk_file=/etc/salt/pki/master/nacl.pub
+            sk_file=/etc/salt/pki/master/nacl
     """
     kwargs["opts"] = __opts__
     kwargs["salt_funcs"] = globals().get("__salt__", {})

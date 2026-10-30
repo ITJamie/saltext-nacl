@@ -231,7 +231,7 @@ def enc_file(name, out=None, **kwargs):
         salt-run nacl.enc_file name=/tmp/id_rsa
         salt-call nacl.enc_file name=salt://crt/mycert out=/tmp/cert
         salt-run nacl.enc_file name=/tmp/id_rsa box_type=secretbox \
-            sk_file=/etc/salt/pki/master/nacl.pub
+            sk_file=/etc/salt/pki/master/nacl
     """
     try:
         data = kwargs.get("salt_funcs", globals().get("__salt__", {}))["cp.get_file_str"](name)
@@ -303,7 +303,7 @@ def dec_file(name, out=None, **kwargs):
         salt-run nacl.dec_file name=/tmp/id_rsa.nacl
         salt-call nacl.dec_file name=salt://crt/mycert.nacl out=/tmp/id_rsa
         salt-run nacl.dec_file name=/tmp/id_rsa.nacl box_type=secretbox \
-            sk_file=/etc/salt/pki/master/nacl.pub
+            sk_file=/etc/salt/pki/master/nacl
     """
     try:
         data = kwargs.get("salt_funcs", globals().get("__salt__", {}))["cp.get_file_str"](name)
