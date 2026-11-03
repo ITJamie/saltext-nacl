@@ -3,6 +3,7 @@ Tests for the nacl runner
 """
 
 import ast
+import shutil
 from pathlib import Path
 from unittest.mock import patch
 
@@ -186,10 +187,20 @@ def test_cli_enc_dec_with_master_d_config(salt_factories, tmp_path, minion_opts)
     # No master daemon is needed, but the runner writes a job record here.
     (Path(master.config["cachedir"]) / "proc").mkdir(parents=True, exist_ok=True)
     cli = master.salt_run_cli()
-    encrypted = cli.run("nacl.enc", data="test")
-    assert encrypted.returncode == 0, encrypted
-    # salt-run represents the runner's bytes return value with repr().
-    ciphertext = ast.literal_eval(encrypted.stdout.strip()).decode()
-    decrypted = cli.run("nacl.dec", data=ciphertext)
-    assert decrypted.returncode == 0, decrypted
-    assert ast.literal_eval(decrypted.stdout.strip()) == b"test", decrypted
+    # Salt's default five-second CLI timeout is too small for cold startup under
+    # subprocess coverage on hosted macOS runners. Keep a bounded per-command
+    # budget rather than skipping the CLI or changing its return-cache behavior.
+    try:
+        encrypted = cli.run("nacl.enc", data="test", _timeout=60)
+        assert encrypted.returncode == 0, encrypted
+        # salt-run represents the runner's bytes return value with repr().
+        ciphertext = ast.literal_eval(encrypted.stdout.strip()).decode()
+        decrypted = cli.run("nacl.dec", data=ciphertext, _timeout=60)
+        assert decrypted.returncode == 0, decrypted
+        assert ast.literal_eval(decrypted.stdout.strip()) == b"test", decrypted
+    finally:
+        log_file = Path(master.config["log_file"])
+        if log_file.is_file():
+            artifacts = Path(__file__).resolve().parents[3] / "artifacts"
+            artifacts.mkdir(exist_ok=True)
+            shutil.copyfile(log_file, artifacts / "runner-master.log")

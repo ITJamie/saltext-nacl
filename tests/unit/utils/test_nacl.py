@@ -296,7 +296,8 @@ def test_config_precedence(tmp_path):
         config = nacl._get_config(opts=opts, pk="explicit-key")
     assert config["pk"] == "explicit-key"
     assert config["box_type"] == "secretbox"
-    assert config["sk_file"] == str(tmp_path / "master/nacl")
+    assert pathlib.Path(config["sk_file"]) == tmp_path / "master" / "nacl"
+    assert pathlib.Path(config["pk_file"]) == tmp_path / "master" / "nacl.pub"
     config_get.assert_called_once_with("nacl.config", {})
     with patch.dict(nacl.__salt__, {}, clear=True):
         assert nacl._get_config(opts=opts)["pk"] == "master-key"
@@ -341,7 +342,8 @@ def test_explicitly_disabled_key_file(key_kind, tmp_path):
 def test_file_helpers_round_trip(test_keygen, tmp_path, fileclient, write_output):
     plain = "a secret\nwith Unicode: \u00e9"
     source = tmp_path / "plain"
-    source.write_text(plain, encoding="utf-8")
+    # Control the fixture bytes: write_text translates LF to CRLF on Windows.
+    source.write_bytes(plain.encode("utf-8"))
     kwargs = {
         "opts": {"pki_dir": str(tmp_path)},
         "sk": test_keygen["sk"],
@@ -388,3 +390,18 @@ def test_file_helpers_refuse_overwrite(operation, test_keygen, tmp_path):
     with patch.dict(nacl.__salt__, {}, clear=True), pytest.raises(Exception, match="already exist"):
         getattr(nacl, operation)(str(source), str(output), **kwargs)
     assert output.read_bytes() == b"keep this data"
+
+
+@pytest.mark.parametrize("line_ending", [b"\n", b"\r\n"])
+def test_local_file_helpers_preserve_line_endings(test_keygen, tmp_path, line_ending):
+    plain = b"a secret" + line_ending + "with Unicode: é".encode()
+    source = tmp_path / "plain"
+    encrypted = tmp_path / "encrypted"
+    restored = tmp_path / "restored"
+    source.write_bytes(plain)
+    kwargs = {"opts": {"pki_dir": str(tmp_path)}, "sk": test_keygen["sk"], "box_type": "secretbox"}
+    with patch.dict(nacl.__salt__, {}, clear=True):
+        assert nacl.enc_file(str(source), str(encrypted), **kwargs) == f"Wrote: {encrypted}"
+        assert nacl.dec_file(str(encrypted), **kwargs) == plain
+        assert nacl.dec_file(str(encrypted), str(restored), **kwargs) == f"Wrote: {restored}"
+    assert restored.read_bytes() == source.read_bytes()
