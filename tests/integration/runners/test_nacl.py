@@ -172,7 +172,11 @@ def test_enc_dec_no_pk_no_sk(test_data, minion_opts):
 @pytest.mark.skipif(FIPS_TESTRUN, reason="NaCl is unavailable in FIPS mode")
 def test_cli_enc_dec_with_master_d_config(salt_factories, tmp_path, minion_opts):
     """Load the built-in runner and read key paths only from master.d."""
-    master = salt_factories.salt_master_daemon("nacl-config-master")
+    # Core grains probing can block on hosted macOS hardware/network inventory.
+    # NaCl does not consume grains; keep the real CLI and default job caching.
+    master = salt_factories.salt_master_daemon(
+        "nacl-config-master", overrides={"skip_grains": True}
+    )
     with patch("saltext.nacl.runners.nacl.__opts__", minion_opts, create=True):
         keys = nacl.keygen()
     sk_file = tmp_path / "nacl_sk"
@@ -187,15 +191,13 @@ def test_cli_enc_dec_with_master_d_config(salt_factories, tmp_path, minion_opts)
     # No master daemon is needed, but the runner writes a job record here.
     (Path(master.config["cachedir"]) / "proc").mkdir(parents=True, exist_ok=True)
     cli = master.salt_run_cli()
-    # Salt's default five-second CLI timeout is too small for cold startup under
-    # subprocess coverage on hosted macOS runners. Keep a bounded per-command
-    # budget rather than skipping the CLI or changing its return-cache behavior.
+    # Bound covered subprocess startup independently of Salt's internal timeout.
     try:
-        encrypted = cli.run("nacl.enc", data="test", _timeout=60)
+        encrypted = cli.run("--timeout=5", "nacl.enc", data="test", _timeout=60)
         assert encrypted.returncode == 0, encrypted
         # salt-run represents the runner's bytes return value with repr().
         ciphertext = ast.literal_eval(encrypted.stdout.strip()).decode()
-        decrypted = cli.run("nacl.dec", data=ciphertext, _timeout=60)
+        decrypted = cli.run("--timeout=5", "nacl.dec", data=ciphertext, _timeout=60)
         assert decrypted.returncode == 0, decrypted
         assert ast.literal_eval(decrypted.stdout.strip()) == b"test", decrypted
     finally:

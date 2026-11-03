@@ -22,7 +22,9 @@ def test_package_metadata_and_entry_point():
 
 def test_loaders_choose_extension(tmp_path):
     opts = salt.config.master_config(None)
-    opts.update({"pki_dir": str(tmp_path), "cachedir": str(tmp_path / "cache")})
+    opts.update(
+        {"pki_dir": str(tmp_path), "cachedir": str(tmp_path / "cache"), "skip_grains": True}
+    )
     utils = salt.loader.utils(opts)
     functions = salt.loader.minion_mods(opts, utils=utils)
     loaders = [
@@ -56,6 +58,7 @@ def test_shared_utility_is_extension_owned(monkeypatch, tmp_path):
     assert Path(extension_nacl.__file__).resolve().is_relative_to(PACKAGE_ROOT)
     opts = salt.config.minion_config(None)
     opts["pki_dir"] = str(tmp_path)
+    opts["skip_grains"] = True
     functions = salt.loader.minion_mods(opts)
     monkeypatch.setattr(core_nacl, "enc", lambda *args, **kwargs: pytest.fail("Core helper used"))
     keys = extension_nacl.keygen()

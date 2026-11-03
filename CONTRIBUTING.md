@@ -25,6 +25,10 @@ in the extension's coverage denominator. No extension-owned behavior is excluded
 
 The CI matrix covers Linux on Python 3.10–3.14, and Windows/macOS on 3.10 and 3.14.
 Windows permission branches are additionally tested with mocks on other systems.
+Test Salt configurations set `skip_grains: true`: NaCl does not depend on host
+hardware or DNS discovery, which can stall on hosted macOS VMs. This changes
+only test configuration, not extension defaults; the real CLI, default runner
+job caching and all encryption/decryption assertions remain enabled.
 Functional tests verify built-in core NaCl modules lose to the installed extension.
 A separate wheel smoke test runs outside the checkout and checks its installation path.
 

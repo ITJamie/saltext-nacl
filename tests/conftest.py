@@ -18,6 +18,8 @@ def minion_opts(tmp_path):
     opts = salt.config.minion_config(None)
     opts.update(
         {
+            # These tests exercise NaCl, not machine inventory or DNS probes.
+            "skip_grains": True,
             "root_dir": str(tmp_path),
             "pki_dir": str(tmp_path / "pki"),
             "cachedir": str(tmp_path / "cache"),
