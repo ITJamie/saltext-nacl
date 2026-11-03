@@ -23,7 +23,7 @@ Issues = "https://github.com/ITJamie/saltext-nacl/issues"
 
 [project.optional-dependencies]
 salt = ["salt>=3008,<3009"]
-tests = ["pytest>=8.4,<9", "pytest-salt-factories>=1.0.5", "pytest-timeout>=2.4", "coverage>=7.10", "PyYAML", "Jinja2", "msgpack", "looseversion", "packaging", "requests", "tornado", "pyzmq", "psutil", "distro", "python-dateutil", "pycryptodomex", "setproctitle", "xxhash", "pywin32; sys_platform=='win32'", "wmi; sys_platform=='win32'"]
+tests = ["pytest>=8.4,<10", "pytest-salt-factories>=1.0.5", "pytest-timeout>=2.4", "coverage>=7.10", "PyYAML", "Jinja2", "msgpack", "looseversion", "packaging", "requests", "tornado", "pyzmq", "psutil", "distro", "python-dateutil", "pycryptodomex", "setproctitle", "xxhash", "pywin32; sys_platform=='win32'", "wmi; sys_platform=='win32'"]
 docs = ["sphinx>=7", "furo", "myst-parser"]
 dev = ["nox>=2024.3", "build", "twine", "ruff>=0.14", "bandit>=1.8", "towncrier>=25", "pre-commit>=4"]
 
