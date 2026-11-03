@@ -24,7 +24,7 @@ pytestmark = []
 
 @pytest.fixture(scope="module")
 def minion_opts():
-    return salt.config.minion_config(None)
+    return salt.config.minion_config(None, minion_id="nacl-test-minion")
 
 
 @pytest.fixture

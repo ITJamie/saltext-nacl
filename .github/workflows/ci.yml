@@ -33,7 +33,7 @@ jobs:
           python-version: ${{ matrix.python }}
       - run: python -m pip install --no-deps salt==3008.5
       - run: python -m pip install -e ".[tests]"
-      - run: python tools/test.py --junitxml=artifacts/junit.xml --log-file=artifacts/pytest.log --log-file-level=DEBUG --durations=10
+      - run: python tools/test.py -vv --junitxml=artifacts/junit.xml --log-file=artifacts/pytest.log --log-file-level=DEBUG --durations=10
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:

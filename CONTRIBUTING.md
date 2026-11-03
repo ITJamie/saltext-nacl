@@ -42,3 +42,7 @@ custom packaging, release guards, strict coverage and workflow configuration.
 Never update from a nonexistent template version or blindly overwrite overrides.
 
 Do not publish a release simply to test CI. See the release checklist.
+
+Test configurations use explicit Salt IDs so hosted macOS hostname resolution
+does not delay NaCl tests. Tests have a 120-second limit and emit Python stack
+traces after 60 seconds to diagnose future stalls.

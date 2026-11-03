@@ -15,7 +15,7 @@ def salt_factories_config():
 
 @pytest.fixture
 def minion_opts(tmp_path):
-    opts = salt.config.minion_config(None)
+    opts = salt.config.minion_config(None, minion_id="nacl-test-minion")
     opts.update(
         {
             # These tests exercise NaCl, not machine inventory or DNS probes.

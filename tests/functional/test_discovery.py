@@ -21,7 +21,9 @@ def test_package_metadata_and_entry_point():
 
 
 def test_loaders_choose_extension(tmp_path):
-    opts = salt.config.master_config(None)
+    opts = salt.config.master_config(
+        None, defaults={**salt.config.DEFAULT_MASTER_OPTS, "id": "nacl-test-master"}
+    )
     opts.update(
         {"pki_dir": str(tmp_path), "cachedir": str(tmp_path / "cache"), "skip_grains": True}
     )
@@ -56,7 +58,7 @@ def test_ciphertext_interoperability(box_type, tmp_path):
 
 def test_shared_utility_is_extension_owned(monkeypatch, tmp_path):
     assert Path(extension_nacl.__file__).resolve().is_relative_to(PACKAGE_ROOT)
-    opts = salt.config.minion_config(None)
+    opts = salt.config.minion_config(None, minion_id="nacl-test-minion")
     opts["pki_dir"] = str(tmp_path)
     opts["skip_grains"] = True
     functions = salt.loader.minion_mods(opts)

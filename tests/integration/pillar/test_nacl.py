@@ -26,7 +26,7 @@ def test_ext_pillar_decrypts_nested_data(tmp_path):
         encoding="utf-8",
     )
     master_config = tmp_path / "master"
-    master_config.write_text("", encoding="utf-8")
+    master_config.write_text("id: nacl-test-master\n", encoding="utf-8")
     opts = salt.config.master_config(str(master_config))
     opts["skip_grains"] = True
     ciphertext = base64.b64encode(nacl_public.SealedBox(key.public_key).encrypt(b"test")).decode()
